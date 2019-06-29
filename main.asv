@@ -1,0 +1,79 @@
+clear all 
+close all
+if isdir('./Outputs')==1
+else
+mkdir('./Outputs');
+end
+arraymax = [];
+arraymin = [];
+data.x = [];
+data.y = [];
+data.z = [];
+data_length = 10000;
+for i = 1:1:15
+    data.x = [data.x [zeros(data_length/2, 1); -5 + (5+5)*rand(data_length,1); zeros(data_length/2, 1)]];
+    data.y = [data.y [zeros(data_length/2, 1); -5 + (5+5)*rand(data_length,1); zeros(data_length/2, 1)]];
+    data.z = sin(data.x)+sin(data.y);
+    
+    arraymax = [arraymax max(data.z)];
+    arraymin = [arraymin min(data.z)];
+end
+globalmax = max(arraymax);
+globalmin = min(arraymin);
+% globalmax = 0.5;
+% globalmin = -0.07;
+figure;
+% light;
+% lighting phong;
+% camlight('left');
+for i=1:1:15
+out_file = ['./Outputs/finalimages', num2str(i)];
+
+X = data.x(:,i);
+Y = data.y(:,i);
+Z = data.z(:,i);
+[xq,yq] = meshgrid(-5:.02:5, -5:.02:5);
+zq = griddata(X,Y,Z,xq,yq);
+surf(xq,yq,zq)
+
+
+xlabel('Distance to the Trench (km)')
+ylabel('Along Strike (km)')
+zlabel('Depth (km)')
+ax = gca;
+ax.Visible = 'off';
+
+% axis equal
+axis tight
+for j = 1:180
+az=143 ; el=87;
+view([az el]); 
+
+light;
+lighting phong;
+camlight('left');
+shading interp;
+xlim([-10 10])
+ylim([-10 10])
+zlim([globalmin,globalmax])
+load('MyColormap.mat')
+colormap(c)
+% colormap(flipud(jet(64)));
+caxis([globalmin,globalmax]);
+colorbar('vertical');
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0.04, 1, 0.96]);
+saveas(gcf,out_file, 'png')
+
+% colormapeditor
+% ax = gca;
+% c = colormap(ax);
+% save('MyColormap','c')
+
+%% 
+% hold on
+% plot3(Y,Z,Vz,'o')
+% xlim([-40 40])
+% ylim([-40 40])
+
+
+end
